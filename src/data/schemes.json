@@ -1,0 +1,152 @@
+[
+  {
+    "id": "pm-kisan",
+    "name": "PM-Kisan Samman Nidhi",
+    "description": "Income support of Rs 6000 per year in three equal installments to all landholding farmer families.",
+    "eligibility": {
+      "minLand": 0,
+      "maxLand": null,
+      "incomeLimit": null,
+      "cropRequired": null,
+      "irrigationRequired": null,
+      "applicableStates": null
+    },
+    "benefitAmount": 6000,
+    "requiredDocuments": ["Aadhaar", "Land records", "Bank account details"]
+  },
+  {
+    "id": "kcc",
+    "name": "Kisan Credit Card (KCC)",
+    "description": "Short-term credit for crop cultivation, post-harvest expenses, and working capital for agriculture.",
+    "eligibility": {
+      "minLand": 0,
+      "maxLand": null,
+      "incomeLimit": 500000,
+      "cropRequired": null,
+      "irrigationRequired": null,
+      "applicableStates": null
+    },
+    "benefitAmount": 300000,
+    "requiredDocuments": ["Land documents", "Identity proof", "Bank passbook", "Passport size photo"]
+  },
+  {
+    "id": "pmfby",
+    "name": "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+    "description": "Crop insurance with low premium for farmers against natural calamities and yield loss.",
+    "eligibility": {
+      "minLand": 0,
+      "maxLand": null,
+      "incomeLimit": null,
+      "cropRequired": null,
+      "irrigationRequired": null,
+      "applicableStates": null
+    },
+    "benefitAmount": 50000,
+    "requiredDocuments": ["Land records", "Aadhaar", "Sowing declaration", "Bank account"]
+  },
+  {
+    "id": "micro-irrigation",
+    "name": "Per Drop More Crop (Micro Irrigation)",
+    "description": "Subsidy for drip and sprinkler irrigation to improve water use efficiency.",
+    "eligibility": {
+      "minLand": 0.1,
+      "maxLand": null,
+      "incomeLimit": null,
+      "cropRequired": null,
+      "irrigationRequired": true,
+      "applicableStates": null
+    },
+    "benefitAmount": 50000,
+    "requiredDocuments": ["Land records", "Water source proof", "Aadhaar", "Bank details"]
+  },
+  {
+    "id": "rashtriya-krishi",
+    "name": "Rashtriya Krishi Vikas Yojana (RKVY)",
+    "description": "State-level scheme for integrated development of agriculture and allied sectors.",
+    "eligibility": {
+      "minLand": 0.5,
+      "maxLand": 10,
+      "incomeLimit": 200000,
+      "cropRequired": null,
+      "irrigationRequired": null,
+      "applicableStates": ["Maharashtra", "Madhya Pradesh", "Rajasthan", "Uttar Pradesh", "Karnataka", "Andhra Pradesh", "Punjab", "Haryana", "Gujarat", "Tamil Nadu", "Bihar", "West Bengal"]
+    },
+    "benefitAmount": 100000,
+    "requiredDocuments": ["Land records", "Aadhaar", "Income certificate", "Bank account"]
+  },
+  {
+    "id": "organic-farming",
+    "name": "Paramparagat Krishi Vikas Yojana (PKVY)",
+    "description": "Promotion of organic farming with financial support for conversion and certification.",
+    "eligibility": {
+      "minLand": 0.4,
+      "maxLand": 4,
+      "incomeLimit": null,
+      "cropRequired": null,
+      "irrigationRequired": null,
+      "applicableStates": null
+    },
+    "benefitAmount": 50000,
+    "requiredDocuments": ["Land records", "Aadhaar", "Conversion plan", "Bank details"]
+  },
+  {
+    "id": "wheat-subsidy",
+    "name": "National Food Security Mission - Wheat",
+    "description": "Support for wheat cultivation with improved seeds and practices.",
+    "eligibility": {
+      "minLand": 0.2,
+      "maxLand": null,
+      "incomeLimit": null,
+      "cropRequired": "Wheat",
+      "irrigationRequired": true,
+      "applicableStates": null
+    },
+    "benefitAmount": 15000,
+    "requiredDocuments": ["Land records", "Sowing certificate", "Aadhaar", "Bank account"]
+  },
+  {
+    "id": "paddy-subsidy",
+    "name": "National Food Security Mission - Paddy",
+    "description": "Support for paddy/rice cultivation with quality seeds and nutrient management.",
+    "eligibility": {
+      "minLand": 0.2,
+      "maxLand": 5,
+      "incomeLimit": 300000,
+      "cropRequired": "Paddy",
+      "irrigationRequired": null,
+      "applicableStates": null
+    },
+    "benefitAmount": 20000,
+    "requiredDocuments": ["Land records", "Crop declaration", "Aadhaar", "Bank details"]
+  },
+  {
+    "id": "small-marginal",
+    "name": "Sub-Mission on Agricultural Mechanization (SMAM)",
+    "description": "Subsidy on farm machinery for small and marginal farmers.",
+    "eligibility": {
+      "minLand": 0,
+      "maxLand": 2,
+      "incomeLimit": 250000,
+      "cropRequired": null,
+      "irrigationRequired": null,
+      "applicableStates": null
+    },
+    "benefitAmount": 75000,
+    "requiredDocuments": ["Land records", "Aadhaar", "Income certificate", "Bank account", "Quotation for machinery"]
+  },
+  {
+    "id": "rainfed-support",
+    "name": "Rainfed Area Development Programme",
+    "description": "Support for farmers in rainfed areas for integrated farming and water harvesting.",
+    "eligibility": {
+      "minLand": 0.5,
+      "maxLand": 4,
+      "incomeLimit": 180000,
+      "cropRequired": null,
+      "irrigationRequired": false,
+      "applicableStates": null
+    },
+    "benefitAmount": 40000,
+    "requiredDocuments": ["Land records", "Aadhaar", "No irrigation certificate (if applicable)", "Bank details"]
+  }
+]
