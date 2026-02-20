@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { logger } from "@/lib/logger";
 
 interface VoiceInputProps {
   onResult: (text: string) => void;
@@ -8,16 +9,54 @@ interface VoiceInputProps {
   lang?: "en" | "hi";
 }
 
+// Type definitions for Speech Recognition API
+type SpeechRecognitionAlternative = {
+  readonly transcript: string;
+  readonly confidence: number;
+};
+
+type SpeechRecognitionResult = {
+  readonly length: number;
+  readonly isFinal: boolean;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+};
+
+type SpeechRecognitionResultListType = {
+  readonly length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+};
+
+type SpeechRecognitionEventType = Event & {
+  readonly results: SpeechRecognitionResultListType;
+  readonly resultIndex: number;
+};
+
+type SpeechRecognitionType = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((e: SpeechRecognitionEventType) => void) | null;
+  onend: (() => void) | null;
+  onerror: ((e: Event) => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+};
+
+
 export function VoiceInput({ onResult, disabled, lang = "en" }: VoiceInputProps) {
   const [listening, setListening] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionType | null>(null);
 
   // Check if Speech Recognition is supported (client-side only)
   useEffect(() => {
     if (typeof window !== "undefined") {
       const SpeechRecognitionClass =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
+        (window as unknown as { SpeechRecognition?: { new (): SpeechRecognitionType }; webkitSpeechRecognition?: { new (): SpeechRecognitionType } }).SpeechRecognition ||
+        (window as unknown as { SpeechRecognition?: { new (): SpeechRecognitionType }; webkitSpeechRecognition?: { new (): SpeechRecognitionType } }).webkitSpeechRecognition;
       setIsSupported(!!SpeechRecognitionClass);
     }
   }, []);
@@ -28,7 +67,8 @@ export function VoiceInput({ onResult, disabled, lang = "en" }: VoiceInputProps)
     }
 
     const SpeechRecognitionClass =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+      (window as unknown as { SpeechRecognition?: { new (): SpeechRecognitionType }; webkitSpeechRecognition?: { new (): SpeechRecognitionType } }).SpeechRecognition ||
+      (window as unknown as { SpeechRecognition?: { new (): SpeechRecognitionType }; webkitSpeechRecognition?: { new (): SpeechRecognitionType } }).webkitSpeechRecognition;
 
     if (!SpeechRecognitionClass) {
       onResult("");
@@ -40,7 +80,7 @@ export function VoiceInput({ onResult, disabled, lang = "en" }: VoiceInputProps)
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.lang = lang === "hi" ? "hi-IN" : "en-IN";
-      recognition.onresult = (e: SpeechRecognitionEvent) => {
+      recognition.onresult = (e: SpeechRecognitionEventType) => {
         const result = e.results[e.results.length - 1];
         if (result && result.length > 0) {
           const transcript = result[0].transcript;
@@ -59,7 +99,7 @@ export function VoiceInput({ onResult, disabled, lang = "en" }: VoiceInputProps)
       recognitionRef.current = recognition;
       setListening(true);
     } catch (error) {
-      console.error("[VoiceInput] Failed to start recognition:", error);
+      logger.error("[VoiceInput] Failed to start recognition:", error);
       setListening(false);
     }
   }, [onResult, lang]);
@@ -69,7 +109,7 @@ export function VoiceInput({ onResult, disabled, lang = "en" }: VoiceInputProps)
       try {
         recognitionRef.current.stop();
       } catch (error) {
-        console.error("[VoiceInput] Error stopping recognition:", error);
+        logger.error("[VoiceInput] Error stopping recognition:", error);
       }
       recognitionRef.current = null;
     }
