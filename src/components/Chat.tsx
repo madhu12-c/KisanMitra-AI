@@ -8,6 +8,7 @@ import { VoiceInput } from "./VoiceInput";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTranslation } from "@/lib/useTranslation";
 import type { Language } from "@/lib/translations";
+import { logger } from "@/lib/logger";
 
 type MessageRole = "user" | "assistant";
 
@@ -142,7 +143,7 @@ export function Chat() {
     const previousLang = prevLangRef.current;
     prevLangRef.current = language;
     
-    console.log(`[Chat] Language changed from ${previousLang} to ${language}, re-fetching explanation...`);
+    logger.log(`[Chat] Language changed from ${previousLang} to ${language}, re-fetching explanation...`);
     
     (async () => {
       setLoading(true);
@@ -163,7 +164,7 @@ export function Chat() {
         });
         const data = await res.json();
         if (res.ok && data.aiExplanation) {
-          console.log(`[Chat] Updated explanation in ${language}`);
+          logger.log(`[Chat] Updated explanation in ${language}`);
           setResult((r) => (r ? { ...r, aiExplanation: data.aiExplanation } : r));
           setMessages((prev) => {
             const idx = prev.findLastIndex((m) => m.role === "assistant");
@@ -173,10 +174,10 @@ export function Chat() {
             return next;
           });
         } else {
-          console.error("[Chat] Failed to fetch explanation:", data.error);
+          logger.error("[Chat] Failed to fetch explanation:", data.error);
         }
       } catch (err) {
-        console.error("[Chat] Error re-fetching explanation:", err);
+        logger.error("[Chat] Error re-fetching explanation:", err);
       } finally {
         setLoading(false);
       }
@@ -194,7 +195,7 @@ export function Chat() {
     if (step < PROFILE_STEPS_CONFIG.length) {
       const current = PROFILE_STEPS_CONFIG[step];
       if (!current) {
-        console.error(`[Chat] Invalid step index: ${step}`);
+        logger.error(`[Chat] Invalid step index: ${step}`);
         return;
       }
       const value = current.parse(raw);
@@ -209,7 +210,7 @@ export function Chat() {
         if (nextStep) {
           addMessage("assistant", t(nextStep.labelKey));
         } else {
-          console.error(`[Chat] Could not get label for step ${step + 1}`);
+          logger.error(`[Chat] Could not get label for step ${step + 1}`);
         }
       }
     }

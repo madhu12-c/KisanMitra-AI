@@ -3,8 +3,15 @@ import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 
 export const metadata: Metadata = {
-  title: "KisanMitra AI",
-  description: "Intelligent Government Scheme Discovery for Farmers",
+  title: "KisanMitra AI - Government Scheme Discovery for Farmers",
+  description: "Discover government schemes you are eligible for. Rule-based eligibility checking with AI-powered explanations in Hindi and English.",
+  keywords: ["government schemes", "farmer benefits", "agricultural schemes", "India", "eligibility checker"],
+  authors: [{ name: "KisanMitra AI" }],
+  openGraph: {
+    title: "KisanMitra AI - Government Scheme Discovery",
+    description: "Discover government schemes you are eligible for. Rule-based eligibility checking with AI-powered explanations.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

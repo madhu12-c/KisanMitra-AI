@@ -11,6 +11,7 @@ import { checkEligibility } from "@/lib/eligibility/engine";
 import { rankEligibleSchemes, getTopRecommended } from "@/lib/eligibility/ranking";
 import { getExplanation, type ExplanationLanguage } from "@/lib/ai/explain";
 import type { UserProfile, Scheme, EligibilityResult } from "@/lib/eligibility/types";
+import { logger } from "@/lib/logger";
 
 const schemes = schemesData as Scheme[];
 
@@ -20,8 +21,7 @@ export async function POST(request: Request) {
     const userProfile = body.userProfile as UserProfile;
     const language: ExplanationLanguage = body.language === "hi" ? "hi" : "en";
 
-    console.log(`[API] /recommend called with language: ${language}`);
-    console.log(`[API] User profile:`, JSON.stringify(userProfile, null, 2));
+    logger.log(`[API] /recommend called with language: ${language}`);
 
     if (!userProfile || typeof userProfile.landSize !== "number" || typeof userProfile.annualIncome !== "number") {
       return NextResponse.json(
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     // 1. Rule-based eligibility (no AI)
     const result = checkEligibility(userProfile, schemes);
-    console.log(`[API] Eligibility check complete: ${result.eligibleSchemes.length} eligible, ${result.notEligibleSchemes.length} not eligible`);
+    logger.log(`[API] Eligibility check complete: ${result.eligibleSchemes.length} eligible, ${result.notEligibleSchemes.length} not eligible`);
 
     // 2. Rank and ensure top 3
     const ranked = rankEligibleSchemes(result.eligibleSchemes);
@@ -43,9 +43,8 @@ export async function POST(request: Request) {
     };
 
     // 3. AI explanation only (no eligibility decision)
-    console.log(`[API] Calling getExplanation with language: ${language}`);
     const aiExplanation = await getExplanation(structuredResult, language);
-    console.log(`[API] Explanation received (${aiExplanation.length} chars)`);
+    logger.log(`[API] Explanation received (${aiExplanation.length} chars)`);
 
     return NextResponse.json({
       structuredResult: {
@@ -57,10 +56,9 @@ export async function POST(request: Request) {
       aiExplanation,
     });
   } catch (e: any) {
-    console.error("[API] Recommend API error:", e?.message || e);
-    console.error("[API] Full error:", e);
+    logger.error("[API] Recommend API error:", e?.message || e);
     return NextResponse.json(
-      { error: `Recommendation failed: ${e?.message || "Unknown error"}. Please check server logs.` },
+      { error: "Recommendation failed. Please try again later." },
       { status: 500 }
     );
   }

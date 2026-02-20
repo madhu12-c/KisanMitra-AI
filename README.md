@@ -46,6 +46,17 @@ Intelligent Government Scheme Discovery Platform for farmers. This is a **select
 - 700+ scheme coverage  
 - 10M concurrent scaling  
 
+## Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed Vercel deployment instructions.
+
+### Quick Deploy to Vercel
+
+1. Push code to GitHub
+2. Import repository in Vercel
+3. Add environment variable: `GROQ_API_KEY`
+4. Deploy!
+
 ## Folder structure
 
 ```
@@ -55,5 +66,16 @@ src/
   lib/
     eligibility/  # engine, ranking, types
     ai/           # explain (Groq)
+    logger.ts     # Production-safe logging
   components/   # Chat, SchemeCard, LanguageToggle, VoiceInput
+  contexts/    # LanguageContext
 ```
+
+## Production Features
+
+- ✅ Production-safe logging (dev-only console.log)
+- ✅ Optimized Next.js config
+- ✅ SEO metadata
+- ✅ Error handling
+- ✅ Environment variable validation
+- ✅ TypeScript strict mode
