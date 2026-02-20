@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "KisanMitra AI - Government Scheme Discovery for Farmers",
@@ -22,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <LanguageProvider>{children}</LanguageProvider>
+        <ErrorBoundary>
+          <LanguageProvider>{children}</LanguageProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

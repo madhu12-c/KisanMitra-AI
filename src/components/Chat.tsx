@@ -9,7 +9,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTranslation } from "@/lib/useTranslation";
 import type { Language } from "@/lib/translations";
 import { logger } from "@/lib/logger";
-type Lang = "en" | "hi";
 
 type MessageRole = "user" | "assistant";
 
@@ -86,7 +85,11 @@ export function Chat() {
   }, []);
 
   const fetchRecommendations = useCallback(
-    async (lang: Lang) => {
+    async (lang: Language) => {
+      if (typeof window === "undefined") {
+        return; // SSR guard
+      }
+      
       setLoading(true);
       try {
         const res = await fetch("/api/recommend", {
@@ -103,24 +106,36 @@ export function Chat() {
             language: lang,
           }),
         });
-        const data = await res.json();
+        
         if (!res.ok) {
-          const errorMsg = data.error || t("somethingWentWrong");
+          const errorData = await res.json().catch(() => ({}));
+          const errorMsg = (errorData as { error?: string }).error || t("somethingWentWrong");
           addMessage("assistant", errorMsg);
           return;
         }
+        
+        const data = await res.json() as {
+          structuredResult: {
+            eligibleSchemes: SchemeCardData[];
+            notEligibleSchemes: SchemeCardData[];
+            topRecommended: SchemeCardData[];
+          };
+          aiExplanation: string;
+        };
+        
         setResult({
           structuredResult: data.structuredResult,
           aiExplanation: data.aiExplanation,
         });
         addMessage("assistant", data.aiExplanation);
-      } catch {
+      } catch (err) {
+        logger.error("[Chat] Fetch error:", err);
         addMessage("assistant", t("couldNotFetch"));
       } finally {
         setLoading(false);
       }
     },
-    [profile, addMessage]
+    [profile, addMessage, t]
   );
 
   const sendForRecommendations = useCallback(async () => {
@@ -130,6 +145,13 @@ export function Chat() {
   }, [language, fetchRecommendations, addMessage, t]);
 
   const prevLangRef = useRef<Language>(language);
+  const profileRef = useRef(profile);
+  
+  // Keep profile ref in sync
+  useEffect(() => {
+    profileRef.current = profile;
+  }, [profile]);
+
   useEffect(() => {
     // Only re-fetch if language changed AND we have results
     if (!result) {
@@ -144,7 +166,15 @@ export function Chat() {
     const previousLang = prevLangRef.current;
     prevLangRef.current = language;
     
+    // Only proceed if we have a valid profile
+    const currentProfile = profileRef.current;
+    if (!currentProfile || currentProfile.landSize === 0 || !currentProfile.cropType || !currentProfile.state) {
+      return;
+    }
+    
     logger.log(`[Chat] Language changed from ${previousLang} to ${language}, re-fetching explanation...`);
+    
+    let cancelled = false;
     
     (async () => {
       setLoading(true);
@@ -154,36 +184,66 @@ export function Chat() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             userProfile: {
-              landSize: profile.landSize,
-              cropType: profile.cropType,
-              annualIncome: profile.annualIncome,
-              irrigationAvailable: profile.irrigationAvailable,
-              state: profile.state,
+              landSize: currentProfile.landSize,
+              cropType: currentProfile.cropType,
+              annualIncome: currentProfile.annualIncome,
+              irrigationAvailable: currentProfile.irrigationAvailable,
+              state: currentProfile.state,
             },
             language,
           }),
         });
-        const data = await res.json();
+        
+        if (cancelled) return;
+        
+        const data = (await res.json()) as {
+          structuredResult?: {
+            eligibleSchemes: SchemeCardData[];
+            notEligibleSchemes: SchemeCardData[];
+            topRecommended: SchemeCardData[];
+          };
+          aiExplanation?: string;
+          error?: string;
+        };
+        
         if (res.ok && data.aiExplanation) {
           logger.log(`[Chat] Updated explanation in ${language}`);
-          setResult((r) => (r ? { ...r, aiExplanation: data.aiExplanation } : r));
+          setResult((r) => {
+            if (!r) return r;
+            return { ...r, aiExplanation: data.aiExplanation! };
+          });
           setMessages((prev) => {
-            const idx = prev.findLastIndex((m) => m.role === "assistant");
+            // Find last assistant message index
+            let idx = -1;
+            for (let i = prev.length - 1; i >= 0; i--) {
+              if (prev[i].role === "assistant") {
+                idx = i;
+                break;
+              }
+            }
             if (idx < 0) return prev;
             const next = [...prev];
-            next[idx] = { ...next[idx], text: data.aiExplanation };
+            next[idx] = { ...next[idx], text: data.aiExplanation! };
             return next;
           });
         } else {
           logger.error("[Chat] Failed to fetch explanation:", data.error);
         }
       } catch (err) {
-        logger.error("[Chat] Error re-fetching explanation:", err);
+        if (!cancelled) {
+          logger.error("[Chat] Error re-fetching explanation:", err);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     })();
-  }, [language, profile, result]);
+    
+    return () => {
+      cancelled = true;
+    };
+  }, [language, result]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

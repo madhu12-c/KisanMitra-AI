@@ -66,8 +66,11 @@ export async function getExplanation(
   result: EligibilityResult,
   language: ExplanationLanguage
 ): Promise<string> {
-  // Try multiple ways to get the API key
-  const apiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
+  // Safely access environment variables (server-side only)
+  const apiKey =
+    (typeof process !== "undefined" && process.env.GROQ_API_KEY) ||
+    (typeof process !== "undefined" && process.env.NEXT_PUBLIC_GROQ_API_KEY) ||
+    "";
   
   if (!apiKey || apiKey.trim() === "" || apiKey === "your_groq_api_key_here") {
     logger.error("[AI] GROQ_API_KEY is not set, empty, or still has placeholder value");
@@ -79,11 +82,13 @@ export async function getExplanation(
   let groq;
   try {
     groq = new Groq({ apiKey });
-  } catch (initError: any) {
-    logger.error("[AI] Failed to initialize Groq client:", initError?.message || initError);
+  } catch (initError: unknown) {
+    const errorMessage =
+      initError instanceof Error ? initError.message : "Unknown error";
+    logger.error("[AI] Failed to initialize Groq client:", errorMessage);
     return language === "hi"
-      ? `Groq क्लाइंट आरंभ करने में त्रुटि: ${initError?.message || "अज्ञात त्रुटि"}`
-      : `Failed to initialize Groq client: ${initError?.message || "Unknown error"}`;
+      ? `Groq क्लाइंट आरंभ करने में त्रुटि: ${errorMessage}`
+      : `Failed to initialize Groq client: ${errorMessage}`;
   }
   const context = buildStructuredContext(result);
   const systemPrompt = getSystemPrompt(language);
@@ -111,9 +116,10 @@ export async function getExplanation(
     }
     logger.log(`[AI] Successfully generated explanation (${text.length} chars)`);
     return text;
-  } catch (err: any) {
-    logger.error("[AI] Groq API error:", err?.message || err);
-    const errorMsg = err?.message || String(err);
+  } catch (err: unknown) {
+    const errorMessage =
+      err instanceof Error ? err.message : "Unknown error";
+    logger.error("[AI] Groq API error:", errorMessage);
     return language === "hi"
       ? `व्याख्या लोड करने में त्रुटि। बाद में पुनः प्रयास करें।`
       : `Error loading explanation. Please check your API key and try again.`;

@@ -1,5 +1,24 @@
+interface SpeechRecognitionResultList {
+  readonly length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  readonly length: number;
+  readonly isFinal: boolean;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+
 interface SpeechRecognitionEvent extends Event {
   readonly results: SpeechRecognitionResultList;
+  readonly resultIndex: number;
 }
 
 interface SpeechRecognition extends EventTarget {
@@ -11,9 +30,18 @@ interface SpeechRecognition extends EventTarget {
   onerror: ((e: Event) => void) | null;
   start(): void;
   stop(): void;
+  abort(): void;
 }
 
-interface Window {
-  SpeechRecognition?: new () => SpeechRecognition;
-  webkitSpeechRecognition?: new () => SpeechRecognition;
+declare global {
+  interface Window {
+    SpeechRecognition?: {
+      new (): SpeechRecognition;
+    };
+    webkitSpeechRecognition?: {
+      new (): SpeechRecognition;
+    };
+  }
 }
+
+export {};

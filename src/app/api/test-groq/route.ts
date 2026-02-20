@@ -7,7 +7,10 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 
 export async function GET() {
-  const apiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
+  const apiKey =
+    process.env.GROQ_API_KEY ||
+    process.env.NEXT_PUBLIC_GROQ_API_KEY ||
+    "";
   
   if (!apiKey || apiKey.trim() === "" || apiKey === "your_groq_api_key_here") {
     return NextResponse.json({
@@ -33,11 +36,16 @@ export async function GET() {
       apiKeyLength: apiKey.length,
       apiKeyPrefix: apiKey.substring(0, 7) + "...",
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    const errorDetails =
+      err && typeof err === "object" && "response" in err
+        ? (err as { response?: { data?: unknown }; status?: unknown })
+        : { status: "Unknown error" };
     return NextResponse.json({
       success: false,
-      error: err?.message || String(err),
-      details: err?.response?.data || err?.status || "Unknown error",
+      error: errorMessage,
+      details: errorDetails.response?.data || errorDetails.status || "Unknown error",
       hint: "Check your API key at https://console.groq.com",
     });
   }

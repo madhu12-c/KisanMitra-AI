@@ -55,8 +55,9 @@ export async function POST(request: Request) {
       },
       aiExplanation,
     });
-  } catch (e: any) {
-    logger.error("[API] Recommend API error:", e?.message || e);
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : "Unknown error";
+    logger.error("[API] Recommend API error:", errorMessage);
     return NextResponse.json(
       { error: "Recommendation failed. Please try again later." },
       { status: 500 }
