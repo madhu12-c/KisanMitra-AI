@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTranslation } from "@/lib/useTranslation";
 import type { Language } from "@/lib/translations";
 import { logger } from "@/lib/logger";
+type Lang = "en" | "hi";
 
 type MessageRole = "user" | "assistant";
 
